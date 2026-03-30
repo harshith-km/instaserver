@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-bg-primary: #0f172a;
   --color-bg-card: #1a2332;
@@ -30,6 +32,9 @@
   background: transparent;
 }
 .preview-scroll::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #cbd5e1;
   border-radius: 3px;
+}
+.dark .preview-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
 }

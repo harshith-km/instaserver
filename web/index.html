@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/instaserver/favicon.svg" />
@@ -7,8 +7,15 @@
     <meta name="description" content="instaserver - Set up your EC2 instance in one command. Interactive script builder for Ubuntu Server and Amazon Linux." />
     <meta name="theme-color" content="#0f172a" />
     <title>instaserver - EC2 Setup Made Easy</title>
+    <script>
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
     <style>
-      body { background: #0f172a; margin: 0; }
+      body { margin: 0; }
+      html.dark body { background: #0f172a; }
+      html:not(.dark) body { background: #ffffff; }
     </style>
   </head>
   <body>
