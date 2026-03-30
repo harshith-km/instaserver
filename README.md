@@ -5,13 +5,13 @@ One-command interactive setup script for fresh EC2 instances (Ubuntu Server / Am
 No cloning, no downloading files manually. Just SSH into your new instance and run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/harshith-km/instaserver/main/ec2-setup.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/harshith-km/instaserver/main/setup.sh)
 ```
 
 Or with `wget`:
 
 ```bash
-bash <(wget -qO- https://raw.githubusercontent.com/harshith-km/instaserver/main/ec2-setup.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/harshith-km/instaserver/main/setup.sh)
 ```
 
 ---
@@ -99,6 +99,28 @@ An interactive, menu-driven script that detects your OS automatically and instal
 | Debian 11+ | apt | Yes |
 | Amazon Linux 2 / 2023 | yum | Yes |
 | RHEL / CentOS / Fedora | yum | Yes |
+
+---
+
+## Project Structure
+
+```
+instaserver/
+├── setup.sh              # Entry point - sources modules & runs main menu
+└── modules/
+    ├── common.sh         # Colors, helpers, OS detection, swap, firewall
+    ├── ssh.sh            # SSH hardening, Fail2Ban, user management
+    ├── database.sh       # PostgreSQL, MySQL, MongoDB, Redis
+    ├── monitoring.sh     # Netdata, Grafana, Prometheus, alerts, Lynis
+    ├── webserver.sh      # Nginx, Node.js, PM2, Docker, Python, SSL
+    ├── hosting.sh        # Backend, frontend & full stack setup flows
+    ├── git.sh            # Git config, SSH key generation
+    └── bashrc.sh         # Aliases, prompt, history, env vars
+```
+
+When run via `curl`, modules are auto-downloaded to a temp directory. When cloned locally, it uses the local `modules/` folder directly.
+
+**Adding a new feature?** Create a new module in `modules/`, source it in `setup.sh`, and add a menu entry.
 
 ---
 
