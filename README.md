@@ -14,6 +14,29 @@ Or with `wget`:
 bash <(wget -qO- https://raw.githubusercontent.com/harshith-km/instaserver/main/setup.sh)
 ```
 
+### Snapshot an existing server
+
+Capture the full state of a running server — projects, configs, packages, services — and generate a reinstall script:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/harshith-km/instaserver/main/snapshot.sh)
+```
+
+**What it captures:**
+- OS & system info, installed packages & versions
+- Git repos with remotes, branches, frameworks detected
+- Directory structure of ~/home, /var/www, /opt, /srv
+- Nginx/Apache configs (full copy)
+- Database names (PostgreSQL, MySQL, MongoDB, Redis)
+- Docker containers, images, compose files
+- PM2 process list & dump
+- Cron jobs, SSH config, firewall rules
+- SSL certificates & expiry dates
+- .env file locations (keys only, no secrets)
+- Custom systemd services
+
+**Output:** `~/server-snapshot-YYYYMMDD-HHMMSS/` with a ready-to-use `reinstall.sh`
+
 ### Headless mode (for AMIs / EC2 user-data)
 
 ```bash
@@ -183,6 +206,7 @@ An interactive, menu-driven script with 25 options across 21 modules.
 ```
 instaserver/
 ├── setup.sh              # Entry point - sources modules, main menu, CLI flags
+├── snapshot.sh           # Server snapshot tool - captures full server state
 ├── VERSION               # Current version (semver)
 └── modules/
     ├── common.sh         # Colors, helpers, OS detection, swap, firewall
