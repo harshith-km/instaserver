@@ -1,16 +1,14 @@
-import { Cloud, Github, ChevronDown } from 'lucide-react'
+import { Cloud, Github, Terminal, Camera } from 'lucide-react'
 import { theme } from '../theme'
 import CopyButton from './CopyButton'
 
 const CURL_CMD = `bash <(curl -fsSL https://raw.githubusercontent.com/harshith-km/instaserver/main/setup.sh)`
 
 export default function Hero() {
-  const scrollToBuilder = () => {
-    document.getElementById('builder').scrollIntoView({ behavior: 'smooth' })
-  }
+  const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
   return (
-    <section className={`min-h-screen flex items-center justify-center px-4 py-12 ${theme.heroSection}`}>
+    <section id="hero" className={`min-h-screen flex items-center justify-center px-4 pt-20 pb-12 ${theme.heroSection}`}>
       <div className="text-center max-w-3xl w-full">
         {/* Badge */}
         <div className={`inline-flex items-center gap-2 ${theme.badge} px-4 py-1.5 rounded-full text-sm font-medium mb-6 animate-fade-in-up`}>
@@ -25,9 +23,9 @@ export default function Hero() {
 
         {/* Tagline */}
         <p className={`text-lg sm:text-xl ${theme.body} mb-10 leading-relaxed animate-fade-in-up delay-200 max-w-xl mx-auto`}>
-          Set up your EC2 instance in one command.
+          Setup, snapshot & replicate your servers.
           <br className="hidden sm:block" />
-          Interactive setup for Ubuntu Server & Amazon Linux.
+          One command. Ubuntu & Amazon Linux.
         </p>
 
         {/* Command box */}
@@ -50,7 +48,7 @@ export default function Hero() {
             { num: '21', label: 'Modules' },
             { num: '25+', label: 'Tools' },
             { num: '2', label: 'OS Families' },
-          ].map((s, i) => (
+          ].map((s) => (
             <div key={s.label} className="flex flex-col items-center">
               <span className={`text-3xl sm:text-4xl font-bold ${theme.statNumber}`}>{s.num}</span>
               <span className={`text-xs ${theme.statLabel} uppercase tracking-wider mt-1`}>{s.label}</span>
@@ -58,23 +56,40 @@ export default function Hero() {
           ))}
         </div>
 
-        {/* CTA Buttons */}
-        <div className="flex justify-center gap-4 flex-wrap animate-fade-in-up delay-500">
+        {/* Two tool cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10 max-w-2xl mx-auto animate-fade-in-up delay-500">
           <button
-            onClick={scrollToBuilder}
-            className={`inline-flex items-center gap-2 px-7 py-3.5 ${theme.btnPrimary} animate-pulse-glow`}
+            onClick={() => scrollTo('builder')}
+            className={`${theme.card} rounded-2xl p-6 text-left group hover:-translate-y-1 transition-all cursor-pointer`}
           >
-            <ChevronDown size={18} />
-            Build Custom Script
+            <Terminal size={24} className={`${theme.accent} mb-3`} />
+            <h3 className={`font-bold mb-1 ${theme.heading}`}>Setup Builder</h3>
+            <p className={`text-sm ${theme.muted}`}>
+              Pick tools & configs, get a ready-to-run setup script.
+            </p>
           </button>
+          <button
+            onClick={() => scrollTo('snapshot')}
+            className={`${theme.card} rounded-2xl p-6 text-left group hover:-translate-y-1 transition-all cursor-pointer`}
+          >
+            <Camera size={24} className={`${theme.accent} mb-3`} />
+            <h3 className={`font-bold mb-1 ${theme.heading}`}>Snapshot Builder</h3>
+            <p className={`text-sm ${theme.muted}`}>
+              Capture your server state & generate a reinstall script.
+            </p>
+          </button>
+        </div>
+
+        {/* GitHub link */}
+        <div className="animate-fade-in-up delay-600">
           <a
             href="https://github.com/harshith-km/instaserver"
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center gap-2 px-7 py-3.5 ${theme.btnSecondary}`}
+            className={`inline-flex items-center gap-2 px-6 py-3 ${theme.btnSecondary} rounded-xl text-sm`}
           >
-            <Github size={18} />
-            GitHub
+            <Github size={16} />
+            View on GitHub
           </a>
         </div>
       </div>

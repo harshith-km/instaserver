@@ -8,10 +8,10 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      className={`fixed top-5 right-5 z-50 p-2.5 rounded-full ${t.themeToggle} animate-fade-in`}
+      className={`fixed top-3.5 right-16 sm:right-4 z-50 p-2 rounded-lg ${t.themeToggle} animate-fade-in`}
       aria-label="Toggle theme"
     >
-      {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+      {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   )
 }
