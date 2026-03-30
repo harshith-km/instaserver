@@ -3,6 +3,7 @@ import { theme } from './theme'
 import ThemeToggle from './components/ThemeToggle'
 import Hero from './components/Hero'
 import ScriptBuilder from './components/ScriptBuilder'
+import Snapshot from './components/Snapshot'
 import Footer from './components/Footer'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
         <ThemeToggle />
         <Hero />
         <ScriptBuilder />
+        <Snapshot />
         <Footer />
       </div>
     </ThemeProvider>
