@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Download, Terminal } from 'lucide-react'
+import { theme } from '../theme'
 import CopyButton from './CopyButton'
 
 const DEFAULT_CONFIG = {
@@ -37,34 +38,34 @@ const DEFAULT_CONFIG = {
 
 function Toggle({ label, checked, onChange, indent }) {
   return (
-    <label className={`flex items-center gap-3 py-1.5 cursor-pointer select-none text-sm ${indent ? 'pl-8' : ''}`}>
+    <label className={`flex items-center gap-3 py-2 cursor-pointer select-none text-sm ${indent ? 'pl-8' : ''}`}>
       <div
         onClick={(e) => { e.preventDefault(); onChange(!checked) }}
-        className={`relative w-10 h-[22px] rounded-full transition-colors shrink-0 cursor-pointer ${
-          checked ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
+        className={`relative w-10 h-[22px] rounded-full shrink-0 cursor-pointer ${
+          checked ? theme.toggleOn : theme.toggleOff
         }`}
       >
         <div
-          className={`absolute top-[3px] left-[3px] w-4 h-4 bg-white rounded-full transition-transform ${
+          className={`absolute top-[3px] left-[3px] w-4 h-4 ${theme.toggleKnob} rounded-full transition-transform ${
             checked ? 'translate-x-[18px]' : ''
           }`}
         />
       </div>
-      <span className="text-slate-700 dark:text-slate-300">{label}</span>
+      <span className={theme.toggleLabel}>{label}</span>
     </label>
   )
 }
 
 function TextInput({ label, value, onChange, placeholder, indent }) {
   return (
-    <div className={`flex items-center gap-3 py-1.5 text-sm ${indent ? 'pl-8' : ''}`}>
-      <label className="min-w-[100px] text-slate-500 dark:text-slate-400">{label}</label>
+    <div className={`flex items-center gap-3 py-2 text-sm ${indent ? 'pl-8' : ''}`}>
+      <label className={`min-w-[100px] ${theme.inputLabel}`}>{label}</label>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white text-sm outline-none focus:border-cyan-500 transition-colors"
+        className={`flex-1 px-3 py-2 rounded-lg text-sm ${theme.input}`}
       />
     </div>
   )
@@ -72,26 +73,18 @@ function TextInput({ label, value, onChange, placeholder, indent }) {
 
 function RadioGroup({ label, options, value, onChange }) {
   return (
-    <div className="py-1.5">
-      <label className="block text-slate-500 dark:text-slate-400 text-sm mb-2">{label}</label>
+    <div className="py-2">
+      <label className={`block ${theme.inputLabel} text-sm mb-2`}>{label}</label>
       <div className="flex gap-2 flex-wrap">
         {options.map((opt) => (
           <label
             key={opt.value}
-            className={`flex items-center px-3.5 py-1.5 rounded-md border cursor-pointer text-sm transition-all ${
-              value === opt.value
-                ? 'bg-cyan-500/10 border-cyan-500 text-cyan-600 dark:text-cyan-400'
-                : 'bg-slate-100 border-slate-300 text-slate-700 hover:border-slate-400 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-600'
+            className={`flex items-center px-4 py-2 rounded-lg border cursor-pointer text-sm font-medium transition-all ${
+              value === opt.value ? theme.radioSelected : theme.radioUnselected
             }`}
           >
-            <input
-              type="radio"
-              name={label}
-              value={opt.value}
-              checked={value === opt.value}
-              onChange={() => onChange(opt.value)}
-              className="hidden"
-            />
+            <input type="radio" name={label} value={opt.value} checked={value === opt.value}
+              onChange={() => onChange(opt.value)} className="hidden" />
             {opt.label}
           </label>
         ))}
@@ -102,13 +95,10 @@ function RadioGroup({ label, options, value, onChange }) {
 
 function Select({ label, options, value, onChange, indent }) {
   return (
-    <div className={`flex items-center gap-3 py-1.5 text-sm ${indent ? 'pl-8' : ''}`}>
-      <label className="min-w-[100px] text-slate-500 dark:text-slate-400">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 px-3 py-2 bg-slate-100 border border-slate-300 rounded-md text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-white text-sm outline-none focus:border-cyan-500 cursor-pointer transition-colors"
-      >
+    <div className={`flex items-center gap-3 py-2 text-sm ${indent ? 'pl-8' : ''}`}>
+      <label className={`min-w-[100px] ${theme.inputLabel}`}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)}
+        className={`flex-1 px-3 py-2 rounded-lg text-sm ${theme.select}`}>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
@@ -687,17 +677,22 @@ export default function ScriptBuilder() {
   ].filter(Boolean).length
 
   return (
-    <section className="px-4 py-16 max-w-7xl mx-auto" id="builder">
-      <div className="text-center mb-10">
-        <Terminal size={28} className="text-cyan-500 dark:text-cyan-400 mx-auto mb-2" />
-        <h2 className="text-3xl font-bold mb-2">Custom Script Builder</h2>
-        <p className="text-slate-500 dark:text-slate-400 text-lg">Select what you need. Get a ready-to-run bash script.</p>
+    <section className="px-4 sm:px-6 py-20 max-w-7xl mx-auto" id="builder">
+      {/* Section header */}
+      <div className="text-center mb-12 animate-fade-in-up">
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl ${theme.accentBg} bg-opacity-10 mb-4`}>
+          <Terminal size={24} className="text-white" />
+        </div>
+        <h2 className={`text-3xl sm:text-4xl font-bold mb-3 ${theme.heading}`}>Custom Script Builder</h2>
+        <p className={`${theme.muted} text-lg max-w-md mx-auto`}>
+          Toggle what you need. Your script updates live.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Options */}
-        <div className="flex flex-col gap-4">
-          <OptionGroup title="System Setup">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Options - left side */}
+        <div className="flex flex-col gap-4 animate-slide-left">
+          <OptionGroup title="System Setup" delay={0}>
             <Toggle label="Update system packages" checked={config.updateSystem} onChange={(v) => update('updateSystem', v)} />
             <Toggle label="Setup swap file" checked={config.setupSwap} onChange={(v) => update('setupSwap', v)} />
             {config.setupSwap && (
@@ -707,7 +702,7 @@ export default function ScriptBuilder() {
             <TextInput label="Timezone" value={config.timezone} onChange={(v) => update('timezone', v)} placeholder="e.g. Asia/Kolkata, UTC" />
           </OptionGroup>
 
-          <OptionGroup title="Hosting">
+          <OptionGroup title="Hosting" delay={1}>
             <RadioGroup label="Backend runtime" value={config.backendRuntime} onChange={(v) => update('backendRuntime', v)}
               options={[{ value: 'none', label: 'None' }, { value: 'node', label: 'Node.js' }, { value: 'python', label: 'Python' }, { value: 'docker', label: 'Docker' }]} />
             {config.backendRuntime === 'node' && (
@@ -728,14 +723,14 @@ export default function ScriptBuilder() {
             )}
           </OptionGroup>
 
-          <OptionGroup title="Database">
+          <OptionGroup title="Database" delay={2}>
             <Toggle label="PostgreSQL" checked={config.postgresql} onChange={(v) => update('postgresql', v)} />
             <Toggle label="MySQL / MariaDB" checked={config.mysql} onChange={(v) => update('mysql', v)} />
             <Toggle label="MongoDB" checked={config.mongodb} onChange={(v) => update('mongodb', v)} />
             <Toggle label="Redis" checked={config.redis} onChange={(v) => update('redis', v)} />
           </OptionGroup>
 
-          <OptionGroup title="SSH & Security">
+          <OptionGroup title="SSH & Security" delay={3}>
             <Toggle label="Disable root login" checked={config.disableRootLogin} onChange={(v) => update('disableRootLogin', v)} />
             <Toggle label="Disable password auth" checked={config.disablePasswordAuth} onChange={(v) => update('disablePasswordAuth', v)} />
             <Toggle label="Change SSH port" checked={config.changeSSHPort} onChange={(v) => update('changeSSHPort', v)} />
@@ -746,14 +741,14 @@ export default function ScriptBuilder() {
             <Toggle label="Setup firewall (UFW/firewalld)" checked={config.setupFirewall} onChange={(v) => update('setupFirewall', v)} />
           </OptionGroup>
 
-          <OptionGroup title="Monitoring">
+          <OptionGroup title="Monitoring" delay={4}>
             <Toggle label="htop, sysstat, nmon, ncdu" checked={config.installSysmon} onChange={(v) => update('installSysmon', v)} />
             <Toggle label="Netdata (web dashboard)" checked={config.installNetdata} onChange={(v) => update('installNetdata', v)} />
             <Toggle label="Prometheus Node Exporter" checked={config.installNodeExporter} onChange={(v) => update('installNodeExporter', v)} />
             <Toggle label="CPU/Memory/Disk alerts (cron)" checked={config.setupAlerts} onChange={(v) => update('setupAlerts', v)} />
           </OptionGroup>
 
-          <OptionGroup title="Other">
+          <OptionGroup title="Other" delay={5}>
             <Toggle label="AWS CLI v2" checked={config.installAwsCli} onChange={(v) => update('installAwsCli', v)} />
             <Toggle label="Docker" checked={config.installDocker} onChange={(v) => update('installDocker', v)} />
             <Toggle label="Certbot (SSL)" checked={config.installCertbot} onChange={(v) => update('installCertbot', v)} />
@@ -767,28 +762,36 @@ export default function ScriptBuilder() {
           </OptionGroup>
         </div>
 
-        {/* Preview */}
-        <div className="sticky top-4 bg-slate-50 border border-slate-200 dark:bg-[#1a2332] dark:border-slate-700 rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-100 border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700 flex-wrap gap-2">
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
-              <Terminal size={16} />
-              <span>setup.sh</span>
-              <span className="bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 px-2.5 py-0.5 rounded-full text-xs font-semibold">
-                {selectedCount} options
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <CopyButton text={script} label="Copy" />
-              <button
-                onClick={handleDownload}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md border bg-slate-200 border-slate-300 text-slate-700 hover:bg-cyan-500/10 hover:border-cyan-500 hover:text-cyan-600 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:hover:text-cyan-400 transition-all cursor-pointer"
-              >
-                <Download size={14} />
-                Download .sh
-              </button>
+        {/* Preview - right side */}
+        <div className={`sticky top-4 ${theme.previewContainer} rounded-xl overflow-hidden animate-slide-right`}>
+          {/* Preview header with actions */}
+          <div className={`${theme.previewHeader} px-4 py-3`}>
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className={`flex items-center gap-2 ${theme.previewHeaderText} text-sm font-medium`}>
+                <div className="flex gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-red-400/80" />
+                  <span className="w-3 h-3 rounded-full bg-yellow-400/80" />
+                  <span className="w-3 h-3 rounded-full bg-green-400/80" />
+                </div>
+                <span className="ml-2">setup.sh</span>
+                <span className={`${theme.optionCountBadge} px-2.5 py-0.5 rounded-full text-xs font-semibold`}>
+                  {selectedCount} selected
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <CopyButton text={script} label="Copy" />
+                <button
+                  onClick={handleDownload}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg border ${theme.btnAction}`}
+                >
+                  <Download size={14} />
+                  Download
+                </button>
+              </div>
             </div>
           </div>
-          <pre className="p-4 overflow-auto max-h-[80vh] lg:max-h-[85vh] font-mono text-xs leading-relaxed text-slate-600 dark:text-slate-400 preview-scroll">
+          {/* Code output */}
+          <pre className={`p-4 overflow-auto max-h-[75vh] lg:max-h-[82vh] font-mono text-xs leading-relaxed ${theme.codeText} preview-scroll`}>
             <code>{script}</code>
           </pre>
         </div>
@@ -799,11 +802,13 @@ export default function ScriptBuilder() {
 
 function OptionGroup({ title, children }) {
   return (
-    <div className="bg-white border border-slate-200 dark:bg-[#1a2332] dark:border-slate-700 rounded-xl p-5">
-      <h3 className="text-xs uppercase tracking-widest text-cyan-600 dark:text-cyan-400 font-semibold mb-3 pb-2 border-b border-slate-200 dark:border-slate-700">
+    <div className={`${theme.optionGroup} rounded-xl p-5`}>
+      <h3 className={`text-xs uppercase tracking-widest font-semibold mb-4 pb-2.5 ${theme.optionGroupTitle}`}>
         {title}
       </h3>
-      {children}
+      <div className="space-y-0.5">
+        {children}
+      </div>
     </div>
   )
 }

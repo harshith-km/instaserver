@@ -1,4 +1,5 @@
 import { ThemeProvider } from './ThemeContext'
+import { theme } from './theme'
 import ThemeToggle from './components/ThemeToggle'
 import Hero from './components/Hero'
 import ScriptBuilder from './components/ScriptBuilder'
@@ -7,7 +8,7 @@ import Footer from './components/Footer'
 function App() {
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-white text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 transition-colors">
+      <div className={`min-h-screen transition-colors ${theme.page}`}>
         <ThemeToggle />
         <Hero />
         <ScriptBuilder />
