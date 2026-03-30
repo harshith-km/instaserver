@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Cloud, Sun, Moon } from 'lucide-react'
 import { theme } from '../theme'
 import { useTheme } from '../ThemeContext'
@@ -13,19 +13,31 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [active, setActive] = useState('hero')
   const { theme: currentTheme, toggle } = useTheme()
+  const manualClick = useRef(false)
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50)
 
-      const sections = NAV_LINKS.map(l => ({
-        id: l.id,
-        el: document.getElementById(l.id),
-      })).filter(s => s.el)
+      // Skip auto-detection briefly after a manual click
+      if (manualClick.current) return
 
-      for (let i = sections.length - 1; i >= 0; i--) {
-        if (sections[i].el.getBoundingClientRect().top <= 120) {
-          setActive(sections[i].id)
+      const viewportHeight = window.innerHeight
+      const scrollBottom = window.scrollY + viewportHeight
+      const docHeight = document.documentElement.scrollHeight
+
+      // If near bottom of page, activate last section
+      if (docHeight - scrollBottom < 100) {
+        setActive(NAV_LINKS[NAV_LINKS.length - 1].id)
+        return
+      }
+
+      // Find which section's top is closest to (but above) the viewport center
+      const threshold = viewportHeight * 0.35
+      for (let i = NAV_LINKS.length - 1; i >= 0; i--) {
+        const el = document.getElementById(NAV_LINKS[i].id)
+        if (el && el.getBoundingClientRect().top <= threshold) {
+          setActive(NAV_LINKS[i].id)
           break
         }
       }
@@ -35,7 +47,11 @@ export default function Navbar() {
   }, [])
 
   const scrollTo = (id) => {
+    setActive(id) // Immediately set active on click
+    manualClick.current = true
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+    // Re-enable scroll detection after scroll finishes
+    setTimeout(() => { manualClick.current = false }, 1000)
   }
 
   return (
