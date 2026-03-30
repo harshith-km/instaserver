@@ -1,7 +1,214 @@
 import { useState, useMemo } from 'react'
-import { Download, Terminal } from 'lucide-react'
+import { Download, Terminal, Info } from 'lucide-react'
 import { theme } from '../theme'
 import CopyButton from './CopyButton'
+import InfoModal from './InfoModal'
+
+const TOOL_INFO = {
+  updateSystem: {
+    title: 'Update System Packages',
+    description: 'Runs a full system update to ensure all packages are at their latest versions. This is the first thing you should do on a fresh EC2 instance.',
+    details: [
+      'Ubuntu/Debian: apt-get update && apt-get upgrade',
+      'Amazon Linux/RHEL: yum update',
+      'Patches security vulnerabilities and bug fixes',
+    ],
+    link: 'https://ubuntu.com/server/docs/package-management',
+  },
+  setupSwap: {
+    title: 'Swap File',
+    description: 'Creates a swap file to extend available memory using disk space. Essential for small instances (t2.micro, t3.micro) that only have 1GB RAM.',
+    details: [
+      'Prevents out-of-memory crashes on low-RAM instances',
+      'Recommended: 2GB for t2.micro/t3.micro',
+      'Sets swappiness=10 (prefers RAM over swap)',
+      'Persists across reboots via /etc/fstab',
+    ],
+    link: 'https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-swap-volumes.html',
+  },
+  installNginx: {
+    title: 'Nginx Web Server',
+    description: 'High-performance web server and reverse proxy. Used to serve static files, proxy requests to your app, handle SSL termination, and load balancing.',
+    details: [
+      'Serves static files (React, Vue, Angular builds)',
+      'Reverse proxy to Node.js/Python backends',
+      'SSL/TLS termination with Let\'s Encrypt',
+      'WebSocket support, gzip compression, caching',
+    ],
+    link: 'https://nginx.org/en/docs/',
+  },
+  installPm2: {
+    title: 'PM2 Process Manager',
+    description: 'Production-grade process manager for Node.js. Keeps your app running forever, auto-restarts on crash, and manages logs.',
+    details: [
+      'Auto-restart on crash or reboot',
+      'Built-in load balancer (cluster mode)',
+      'Log management and monitoring',
+      'Zero-downtime deployments',
+    ],
+    link: 'https://pm2.keymetrics.io/docs/usage/quick-start/',
+  },
+  installDocker: {
+    title: 'Docker',
+    description: 'Container platform that packages your app and all its dependencies into a standardized unit. Run any app reliably on any infrastructure.',
+    details: [
+      'Consistent dev/staging/prod environments',
+      'Includes Docker Compose for multi-container apps',
+      'Isolated from the host system',
+      'Easy rollbacks and scaling',
+    ],
+    link: 'https://docs.docker.com/get-started/',
+  },
+  postgresql: {
+    title: 'PostgreSQL',
+    description: 'Powerful open-source relational database. Known for reliability, data integrity, and advanced features like JSON support and full-text search.',
+    details: [
+      'ACID compliant with MVCC',
+      'JSON/JSONB for document storage',
+      'Full-text search built-in',
+      'Access: sudo -u postgres psql',
+    ],
+    link: 'https://www.postgresql.org/docs/',
+  },
+  mysql: {
+    title: 'MySQL / MariaDB',
+    description: 'World\'s most popular open-source relational database. Fast, reliable, and widely supported by frameworks and tools.',
+    details: [
+      'MariaDB on Amazon Linux, MySQL on Ubuntu',
+      'Supports InnoDB and MyISAM engines',
+      'Optionally run mysql_secure_installation',
+    ],
+    link: 'https://dev.mysql.com/doc/',
+  },
+  mongodb: {
+    title: 'MongoDB',
+    description: 'Document-oriented NoSQL database. Stores data as flexible JSON-like documents, great for rapid development and scaling.',
+    details: [
+      'Schema-flexible document model',
+      'Horizontal scaling with sharding',
+      'Rich query language and aggregation',
+      'Installs MongoDB 7.0 from official repos',
+    ],
+    link: 'https://www.mongodb.com/docs/',
+  },
+  redis: {
+    title: 'Redis',
+    description: 'In-memory data store used as cache, session store, message broker, and more. Extremely fast with sub-millisecond latency.',
+    details: [
+      'Caching layer for your database',
+      'Session storage for web apps',
+      'Pub/Sub messaging, queues',
+      'Supports persistence to disk',
+    ],
+    link: 'https://redis.io/docs/',
+  },
+  disableRootLogin: {
+    title: 'Disable Root SSH Login',
+    description: 'Prevents anyone from logging in as root via SSH. A critical security measure — use a regular user with sudo instead.',
+    details: [
+      'Sets PermitRootLogin no in sshd_config',
+      'Attackers commonly target the root account',
+      'Make sure you have another sudo user first!',
+    ],
+    link: 'https://www.ssh.com/academy/ssh/sshd_config',
+  },
+  disablePasswordAuth: {
+    title: 'Disable Password Authentication',
+    description: 'Forces key-only SSH access. Passwords can be brute-forced, but SSH keys are virtually uncrackable.',
+    details: [
+      'Sets PasswordAuthentication no',
+      'Ensure your SSH key is in authorized_keys first!',
+      'Protects against brute-force attacks',
+    ],
+    link: 'https://www.ssh.com/academy/ssh/public-key-authentication',
+  },
+  installFail2ban: {
+    title: 'Fail2Ban',
+    description: 'Intrusion prevention tool that monitors logs and bans IPs showing malicious signs. Auto-bans after 5 failed SSH attempts for 1 hour.',
+    details: [
+      'Monitors /var/log/auth.log (or /var/log/secure)',
+      '5 failed attempts = 1 hour ban',
+      'Configurable ban time and thresholds',
+      'Works with SSH, Nginx, Apache, etc.',
+    ],
+    link: 'https://www.fail2ban.org/wiki/index.php/Main_Page',
+  },
+  setupFirewall: {
+    title: 'Firewall (UFW / firewalld)',
+    description: 'Controls which network ports are accessible. Only allows SSH (22), HTTP (80), and HTTPS (443) by default.',
+    details: [
+      'Ubuntu: UFW (Uncomplicated Firewall)',
+      'Amazon Linux: firewalld',
+      'Blocks all ports except SSH, HTTP, HTTPS',
+      'Essential first line of defense',
+    ],
+    link: 'https://help.ubuntu.com/community/UFW',
+  },
+  installSysmon: {
+    title: 'System Monitoring CLI Tools',
+    description: 'Essential command-line tools for monitoring system performance, disk usage, and I/O on your server.',
+    details: [
+      'htop — interactive process viewer',
+      'iotop — disk I/O monitor',
+      'nmon — all-in-one performance monitor',
+      'ncdu — interactive disk usage analyzer',
+      'sysstat — historical performance data (sar)',
+    ],
+  },
+  installNetdata: {
+    title: 'Netdata',
+    description: 'Real-time performance monitoring dashboard accessible via web browser. Zero configuration, auto-discovers everything on your server.',
+    details: [
+      'Web dashboard on port 19999',
+      'CPU, RAM, disk, network, processes',
+      'Auto-detects Nginx, Docker, databases',
+      'No config needed — works out of the box',
+    ],
+    link: 'https://www.netdata.cloud/',
+  },
+  installNodeExporter: {
+    title: 'Prometheus Node Exporter',
+    description: 'Exports system metrics in Prometheus format. Pair with a Prometheus server + Grafana for professional monitoring dashboards.',
+    details: [
+      'Metrics endpoint on port 9100',
+      'CPU, memory, disk, network metrics',
+      'Runs as a systemd service',
+      'Standard in production monitoring stacks',
+    ],
+    link: 'https://prometheus.io/docs/guides/node-exporter/',
+  },
+  setupAlerts: {
+    title: 'Resource Alerts (Cron)',
+    description: 'A lightweight monitoring script that runs every 5 minutes via cron. Logs warnings when CPU, memory, or disk usage crosses thresholds.',
+    details: [
+      'CPU threshold: 90%, Memory: 85%, Disk: 80%',
+      'Logs top processes on alert',
+      'Writes to /var/log/ec2-alerts.log',
+      'Runs every 5 minutes via crontab',
+    ],
+  },
+  installAwsCli: {
+    title: 'AWS CLI v2',
+    description: 'Official command-line tool for interacting with AWS services. Manage S3, EC2, IAM, and 200+ other AWS services from the terminal.',
+    details: [
+      'Installs latest AWS CLI v2',
+      'Auto-detects x86_64 / ARM architecture',
+      'Configure with: aws configure',
+    ],
+    link: 'https://docs.aws.amazon.com/cli/latest/userguide/',
+  },
+  installCertbot: {
+    title: 'Certbot (Let\'s Encrypt SSL)',
+    description: 'Free, automated SSL/TLS certificates from Let\'s Encrypt. Certbot handles certificate issuance, installation, and auto-renewal.',
+    details: [
+      'Free HTTPS certificates',
+      'Auto-configures Nginx for SSL',
+      'Auto-renews before expiry',
+      'Usage: sudo certbot --nginx -d yourdomain.com',
+    ],
+    link: 'https://certbot.eff.org/',
+  },
+}
 
 const DEFAULT_CONFIG = {
   updateSystem: true,
@@ -36,23 +243,34 @@ const DEFAULT_CONFIG = {
   gitEmail: '',
 }
 
-function Toggle({ label, checked, onChange, indent }) {
+function Toggle({ label, checked, onChange, indent, infoKey, onInfo }) {
   return (
-    <label className={`flex items-center gap-3 py-2 cursor-pointer select-none text-sm ${indent ? 'pl-8' : ''}`}>
-      <div
-        onClick={(e) => { e.preventDefault(); onChange(!checked) }}
-        className={`relative w-10 h-[22px] rounded-full shrink-0 cursor-pointer ${
-          checked ? theme.toggleOn : theme.toggleOff
-        }`}
-      >
+    <div className={`flex items-center gap-3 py-2 text-sm ${indent ? 'pl-8' : ''}`}>
+      <label className="flex items-center gap-3 cursor-pointer select-none flex-1">
         <div
-          className={`absolute top-[3px] left-[3px] w-4 h-4 ${theme.toggleKnob} rounded-full transition-transform ${
-            checked ? 'translate-x-[18px]' : ''
+          onClick={(e) => { e.preventDefault(); onChange(!checked) }}
+          className={`relative w-10 h-[22px] rounded-full shrink-0 cursor-pointer ${
+            checked ? theme.toggleOn : theme.toggleOff
           }`}
-        />
-      </div>
-      <span className={theme.toggleLabel}>{label}</span>
-    </label>
+        >
+          <div
+            className={`absolute top-[3px] left-[3px] w-4 h-4 ${theme.toggleKnob} rounded-full transition-transform ${
+              checked ? 'translate-x-[18px]' : ''
+            }`}
+          />
+        </div>
+        <span className={theme.toggleLabel}>{label}</span>
+      </label>
+      {infoKey && TOOL_INFO[infoKey] && (
+        <button
+          onClick={(e) => { e.preventDefault(); onInfo(TOOL_INFO[infoKey]) }}
+          className={`shrink-0 p-1 rounded-md ${theme.muted} hover:text-[#3b82f6] dark:hover:text-[#22d3ee] transition-colors cursor-pointer`}
+          title="More info"
+        >
+          <Info size={15} />
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -648,6 +866,7 @@ echo -e "Run \${BLUE}sudo reboot\${NC} if needed for group/kernel changes."
 
 export default function ScriptBuilder() {
   const [config, setConfig] = useState(DEFAULT_CONFIG)
+  const [activeInfo, setActiveInfo] = useState(null)
 
   const update = (key, value) => {
     setConfig((prev) => ({ ...prev, [key]: value }))
@@ -693,8 +912,8 @@ export default function ScriptBuilder() {
         {/* Options - left side */}
         <div className="flex flex-col gap-4 animate-slide-left">
           <OptionGroup title="System Setup" delay={0}>
-            <Toggle label="Update system packages" checked={config.updateSystem} onChange={(v) => update('updateSystem', v)} />
-            <Toggle label="Setup swap file" checked={config.setupSwap} onChange={(v) => update('setupSwap', v)} />
+            <Toggle label="Update system packages" checked={config.updateSystem} onChange={(v) => update('updateSystem', v)} infoKey="updateSystem" onInfo={setActiveInfo} />
+            <Toggle label="Setup swap file" checked={config.setupSwap} onChange={(v) => update('setupSwap', v)} infoKey="setupSwap" onInfo={setActiveInfo} />
             {config.setupSwap && (
               <Select label="Swap size" indent value={config.swapSize} onChange={(v) => update('swapSize', v)}
                 options={[{ value: '1G', label: '1 GB' }, { value: '2G', label: '2 GB' }, { value: '4G', label: '4 GB' }]} />
@@ -709,10 +928,10 @@ export default function ScriptBuilder() {
               <>
                 <Select label="Node version" indent value={config.nodeVersion} onChange={(v) => update('nodeVersion', v)}
                   options={[{ value: '18', label: 'Node 18 LTS' }, { value: '20', label: 'Node 20 LTS' }, { value: '22', label: 'Node 22 LTS' }]} />
-                <Toggle label="Install PM2" checked={config.installPm2} onChange={(v) => update('installPm2', v)} indent />
+                <Toggle label="Install PM2" checked={config.installPm2} onChange={(v) => update('installPm2', v)} indent infoKey="installPm2" onInfo={setActiveInfo} />
               </>
             )}
-            <Toggle label="Install Nginx" checked={config.installNginx} onChange={(v) => update('installNginx', v)} />
+            <Toggle label="Install Nginx" checked={config.installNginx} onChange={(v) => update('installNginx', v)} infoKey="installNginx" onInfo={setActiveInfo} />
             {config.installNginx && (
               <>
                 <Toggle label="Setup reverse proxy" checked={config.setupProxy} onChange={(v) => update('setupProxy', v)} indent />
@@ -724,34 +943,34 @@ export default function ScriptBuilder() {
           </OptionGroup>
 
           <OptionGroup title="Database" delay={2}>
-            <Toggle label="PostgreSQL" checked={config.postgresql} onChange={(v) => update('postgresql', v)} />
-            <Toggle label="MySQL / MariaDB" checked={config.mysql} onChange={(v) => update('mysql', v)} />
-            <Toggle label="MongoDB" checked={config.mongodb} onChange={(v) => update('mongodb', v)} />
-            <Toggle label="Redis" checked={config.redis} onChange={(v) => update('redis', v)} />
+            <Toggle label="PostgreSQL" checked={config.postgresql} onChange={(v) => update('postgresql', v)} infoKey="postgresql" onInfo={setActiveInfo} />
+            <Toggle label="MySQL / MariaDB" checked={config.mysql} onChange={(v) => update('mysql', v)} infoKey="mysql" onInfo={setActiveInfo} />
+            <Toggle label="MongoDB" checked={config.mongodb} onChange={(v) => update('mongodb', v)} infoKey="mongodb" onInfo={setActiveInfo} />
+            <Toggle label="Redis" checked={config.redis} onChange={(v) => update('redis', v)} infoKey="redis" onInfo={setActiveInfo} />
           </OptionGroup>
 
           <OptionGroup title="SSH & Security" delay={3}>
-            <Toggle label="Disable root login" checked={config.disableRootLogin} onChange={(v) => update('disableRootLogin', v)} />
-            <Toggle label="Disable password auth" checked={config.disablePasswordAuth} onChange={(v) => update('disablePasswordAuth', v)} />
+            <Toggle label="Disable root login" checked={config.disableRootLogin} onChange={(v) => update('disableRootLogin', v)} infoKey="disableRootLogin" onInfo={setActiveInfo} />
+            <Toggle label="Disable password auth" checked={config.disablePasswordAuth} onChange={(v) => update('disablePasswordAuth', v)} infoKey="disablePasswordAuth" onInfo={setActiveInfo} />
             <Toggle label="Change SSH port" checked={config.changeSSHPort} onChange={(v) => update('changeSSHPort', v)} />
             {config.changeSSHPort && (
               <TextInput label="SSH port" value={config.sshPort} onChange={(v) => update('sshPort', v)} placeholder="2222" indent />
             )}
-            <Toggle label="Install Fail2Ban" checked={config.installFail2ban} onChange={(v) => update('installFail2ban', v)} />
-            <Toggle label="Setup firewall (UFW/firewalld)" checked={config.setupFirewall} onChange={(v) => update('setupFirewall', v)} />
+            <Toggle label="Install Fail2Ban" checked={config.installFail2ban} onChange={(v) => update('installFail2ban', v)} infoKey="installFail2ban" onInfo={setActiveInfo} />
+            <Toggle label="Setup firewall (UFW/firewalld)" checked={config.setupFirewall} onChange={(v) => update('setupFirewall', v)} infoKey="setupFirewall" onInfo={setActiveInfo} />
           </OptionGroup>
 
           <OptionGroup title="Monitoring" delay={4}>
-            <Toggle label="htop, sysstat, nmon, ncdu" checked={config.installSysmon} onChange={(v) => update('installSysmon', v)} />
-            <Toggle label="Netdata (web dashboard)" checked={config.installNetdata} onChange={(v) => update('installNetdata', v)} />
-            <Toggle label="Prometheus Node Exporter" checked={config.installNodeExporter} onChange={(v) => update('installNodeExporter', v)} />
-            <Toggle label="CPU/Memory/Disk alerts (cron)" checked={config.setupAlerts} onChange={(v) => update('setupAlerts', v)} />
+            <Toggle label="htop, sysstat, nmon, ncdu" checked={config.installSysmon} onChange={(v) => update('installSysmon', v)} infoKey="installSysmon" onInfo={setActiveInfo} />
+            <Toggle label="Netdata (web dashboard)" checked={config.installNetdata} onChange={(v) => update('installNetdata', v)} infoKey="installNetdata" onInfo={setActiveInfo} />
+            <Toggle label="Prometheus Node Exporter" checked={config.installNodeExporter} onChange={(v) => update('installNodeExporter', v)} infoKey="installNodeExporter" onInfo={setActiveInfo} />
+            <Toggle label="CPU/Memory/Disk alerts (cron)" checked={config.setupAlerts} onChange={(v) => update('setupAlerts', v)} infoKey="setupAlerts" onInfo={setActiveInfo} />
           </OptionGroup>
 
           <OptionGroup title="Other" delay={5}>
-            <Toggle label="AWS CLI v2" checked={config.installAwsCli} onChange={(v) => update('installAwsCli', v)} />
-            <Toggle label="Docker" checked={config.installDocker} onChange={(v) => update('installDocker', v)} />
-            <Toggle label="Certbot (SSL)" checked={config.installCertbot} onChange={(v) => update('installCertbot', v)} />
+            <Toggle label="AWS CLI v2" checked={config.installAwsCli} onChange={(v) => update('installAwsCli', v)} infoKey="installAwsCli" onInfo={setActiveInfo} />
+            <Toggle label="Docker" checked={config.installDocker} onChange={(v) => update('installDocker', v)} infoKey="installDocker" onInfo={setActiveInfo} />
+            <Toggle label="Certbot (SSL)" checked={config.installCertbot} onChange={(v) => update('installCertbot', v)} infoKey="installCertbot" onInfo={setActiveInfo} />
             <Toggle label="Configure Git" checked={config.setupGit} onChange={(v) => update('setupGit', v)} />
             {config.setupGit && (
               <>
@@ -796,6 +1015,8 @@ export default function ScriptBuilder() {
           </pre>
         </div>
       </div>
+
+      <InfoModal info={activeInfo} onClose={() => setActiveInfo(null)} />
     </section>
   )
 }

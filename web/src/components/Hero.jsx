@@ -30,14 +30,18 @@ export default function Hero() {
           Interactive setup for Ubuntu Server & Amazon Linux.
         </p>
 
-        {/* Command box - FIXED: stacked layout so copy button is always visible */}
-        <div className={`${theme.commandBar} rounded-xl p-4 mb-10 animate-fade-in-up delay-300 max-w-2xl mx-auto`}>
-          <div className="overflow-x-auto mb-3 pb-1">
-            <code className={`font-mono text-sm ${theme.commandText} whitespace-nowrap block`}>{CURL_CMD}</code>
+        {/* Command box */}
+        <div className={`${theme.commandBar} rounded-2xl p-5 mb-10 animate-fade-in-up delay-300 max-w-2xl mx-auto text-left`}>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-400/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/70" />
+            <span className="w-2.5 h-2.5 rounded-full bg-green-400/70" />
+            <span className={`ml-2 text-xs font-medium ${theme.muted}`}>Terminal</span>
           </div>
-          <div className="flex justify-end">
-            <CopyButton text={CURL_CMD} label="Copy command" />
-          </div>
+          <code className={`font-mono text-sm ${theme.commandText} break-all leading-relaxed block mb-4`}>
+            <span className={theme.muted}>$ </span>{CURL_CMD}
+          </code>
+          <CopyButton text={CURL_CMD} />
         </div>
 
         {/* Stats */}
