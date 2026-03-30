@@ -53,11 +53,6 @@
   50% { box-shadow: 0 0 20px 4px rgba(59, 130, 246, 0.15); }
 }
 
-@keyframes gradient-x {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
 /* Utility classes */
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out both;
@@ -94,6 +89,20 @@
 .delay-500 { animation-delay: 500ms; }
 .delay-600 { animation-delay: 600ms; }
 
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fade-in,
+  .animate-scale-in,
+  .animate-slide-left,
+  .animate-slide-right,
+  .animate-float,
+  .animate-pulse-glow,
+  .text-gradient {
+    animation: none !important;
+  }
+}
+
 /* Title gradient */
 .text-gradient {
   background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #2563eb 100%);
@@ -112,7 +121,7 @@
   background-clip: text;
 }
 
-/* Scrollbar */
+/* Scrollbar - WebKit */
 .preview-scroll::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -128,14 +137,11 @@
   background: #374151;
 }
 
-/* Smooth all color transitions */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease;
+/* Scrollbar - Firefox */
+.preview-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
-
-/* Override for elements that need different transitions */
-.no-color-transition {
-  transition-property: none;
+.dark .preview-scroll {
+  scrollbar-color: #374151 transparent;
 }

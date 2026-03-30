@@ -18,21 +18,17 @@ export default function Navbar() {
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 50)
-
-      // Skip auto-detection briefly after a manual click
       if (manualClick.current) return
 
       const viewportHeight = window.innerHeight
       const scrollBottom = window.scrollY + viewportHeight
       const docHeight = document.documentElement.scrollHeight
 
-      // If near bottom of page, activate last section
       if (docHeight - scrollBottom < 100) {
         setActive(NAV_LINKS[NAV_LINKS.length - 1].id)
         return
       }
 
-      // Find which section's top is closest to (but above) the viewport center
       const threshold = viewportHeight * 0.35
       for (let i = NAV_LINKS.length - 1; i >= 0; i--) {
         const el = document.getElementById(NAV_LINKS[i].id)
@@ -47,10 +43,9 @@ export default function Navbar() {
   }, [])
 
   const scrollTo = (id) => {
-    setActive(id) // Immediately set active on click
+    setActive(id)
     manualClick.current = true
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-    // Re-enable scroll detection after scroll finishes
     setTimeout(() => { manualClick.current = false }, 1000)
   }
 
@@ -60,20 +55,18 @@ export default function Navbar() {
         ? 'bg-white/80 dark:bg-[#0a0f1e]/80 backdrop-blur-xl border-b border-[#e5e7eb] dark:border-[#1e293b] shadow-sm'
         : 'bg-transparent border-b border-transparent'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-        {/* Logo */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between">
         <button onClick={() => scrollTo('hero')} className="flex items-center gap-2 cursor-pointer">
           <Cloud size={18} className={theme.accent} />
-          <span className={`font-bold text-sm ${theme.heading}`}>instaserver</span>
+          <span className={`font-bold text-sm ${theme.heading} hidden sm:inline`}>instaserver</span>
         </button>
 
-        {/* Center nav links */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           {NAV_LINKS.map((link) => (
             <button
               key={link.id}
               onClick={() => scrollTo(link.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-2 min-h-[44px] flex items-center rounded-lg text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                 active === link.id
                   ? 'text-[#2563eb] dark:text-[#3b82f6] bg-[#2563eb]/10 dark:bg-[#3b82f6]/10'
                   : `${theme.muted} hover:text-[#374151] dark:hover:text-[#d1d5db]`
@@ -84,10 +77,9 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Theme toggle */}
         <button
           onClick={toggle}
-          className={`p-2 rounded-lg ${theme.themeToggle}`}
+          className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg ${theme.themeToggle}`}
           aria-label="Toggle theme"
         >
           {currentTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}

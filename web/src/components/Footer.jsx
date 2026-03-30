@@ -13,7 +13,7 @@ export default function Footer() {
             href="https://github.com/harshith-km/instaserver"
             target="_blank"
             rel="noopener noreferrer"
-            className={`inline-flex items-center gap-1 ${theme.footerLink}`}
+            className={`inline-flex items-center gap-1 py-2 px-1 ${theme.footerLink}`}
           >
             <Github size={14} /> GitHub
           </a>

@@ -678,15 +678,15 @@ echo ""
 
 function Toggle({ label, checked, onChange, infoKey, onInfo }) {
   return (
-    <div className="flex items-center gap-3 py-2 text-sm">
-      <label className="flex items-center gap-3 cursor-pointer select-none flex-1">
+    <div className="flex items-center gap-3 py-1.5 sm:py-2 text-sm">
+      <label className="flex items-center gap-3 cursor-pointer select-none flex-1 min-h-[44px]">
         <div
           onClick={(e) => { e.preventDefault(); onChange(!checked) }}
-          className={`relative w-10 h-[22px] rounded-full shrink-0 cursor-pointer ${
+          className={`relative w-11 h-[26px] rounded-full shrink-0 cursor-pointer ${
             checked ? theme.toggleOn : theme.toggleOff
           }`}
         >
-          <div className={`absolute top-[3px] left-[3px] w-4 h-4 ${theme.toggleKnob} rounded-full transition-transform ${
+          <div className={`absolute top-[3px] left-[3px] w-5 h-5 ${theme.toggleKnob} rounded-full transition-transform ${
             checked ? 'translate-x-[18px]' : ''
           }`} />
         </div>
@@ -695,7 +695,7 @@ function Toggle({ label, checked, onChange, infoKey, onInfo }) {
       {infoKey && SNAP_INFO[infoKey] && (
         <button
           onClick={(e) => { e.preventDefault(); onInfo(SNAP_INFO[infoKey]) }}
-          className={`shrink-0 p-1 rounded-md ${theme.muted} hover:text-[#3b82f6] dark:hover:text-[#22d3ee] transition-colors cursor-pointer`}
+          className={`shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg ${theme.muted} hover:text-[#3b82f6] dark:hover:text-[#22d3ee] transition-colors cursor-pointer`}
         >
           <Info size={15} />
         </button>
@@ -737,7 +737,7 @@ export default function Snapshot() {
   }
 
   return (
-    <section className="px-4 sm:px-6 py-20 max-w-7xl mx-auto" id="snapshot">
+    <section className="px-4 sm:px-6 py-12 sm:py-20 max-w-7xl mx-auto" id="snapshot">
       {/* Header */}
       <div className="text-center mb-12 animate-fade-in-up">
         <div className={`inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-4 ${theme.accentBg}`}>
@@ -786,13 +786,13 @@ export default function Snapshot() {
             <OptionGroup title="Projects">
               <Toggle label="Git repos (remotes, branches, frameworks)" checked={config.projects} onChange={(v) => update('projects', v)} infoKey="projects" onInfo={setActiveInfo} />
               <Toggle label="Directory tree" checked={config.directoryTree} onChange={(v) => update('directoryTree', v)} />
-              <div className="flex items-center gap-3 py-2 text-sm pl-8">
-                <label className={`min-w-[100px] ${theme.inputLabel}`}>Scan dirs</label>
+              <div className="flex items-center gap-3 py-2 text-sm pl-6 sm:pl-8">
+                <label className={`min-w-[80px] sm:min-w-[100px] ${theme.inputLabel}`}>Scan dirs</label>
                 <input type="text" value={config.scanDirs} onChange={(e) => update('scanDirs', e.target.value)}
                   className={`flex-1 px-3 py-2 rounded-lg text-sm ${theme.input}`} />
               </div>
-              <div className="flex items-center gap-3 py-2 text-sm pl-8">
-                <label className={`min-w-[100px] ${theme.inputLabel}`}>Max depth</label>
+              <div className="flex items-center gap-3 py-2 text-sm pl-6 sm:pl-8">
+                <label className={`min-w-[80px] sm:min-w-[100px] ${theme.inputLabel}`}>Max depth</label>
                 <input type="text" value={config.maxDepth} onChange={(e) => update('maxDepth', e.target.value)}
                   className={`w-20 px-3 py-2 rounded-lg text-sm ${theme.input}`} />
               </div>
@@ -839,7 +839,7 @@ export default function Snapshot() {
           </div>
 
           {/* Preview */}
-          <div className={`sticky top-4 ${theme.previewContainer} rounded-xl overflow-hidden animate-slide-right`}>
+          <div className={`lg:sticky lg:top-20 ${theme.previewContainer} rounded-xl overflow-hidden animate-slide-right`}>
             <div className={`${theme.previewHeader} px-4 py-3`}>
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className={`flex items-center gap-2 ${theme.previewHeaderText} text-sm font-medium`}>
@@ -862,7 +862,7 @@ export default function Snapshot() {
                 </div>
               </div>
             </div>
-            <pre className={`p-4 overflow-auto max-h-[75vh] lg:max-h-[82vh] font-mono text-xs leading-relaxed ${theme.codeText} preview-scroll`}>
+            <pre className={`p-4 overflow-auto max-h-[50vh] lg:max-h-[82vh] font-mono text-xs leading-relaxed ${theme.codeText} preview-scroll`}>
               <code>{script}</code>
             </pre>
           </div>
