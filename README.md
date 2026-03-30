@@ -30,9 +30,17 @@ bash <(curl -fsSL https://raw.githubusercontent.com/harshith-km/instaserver/main
 - Database names (PostgreSQL, MySQL, MongoDB, Redis)
 - Docker containers, images, compose files
 - PM2 process list & dump
-- Cron jobs, SSH config, firewall rules
+- Cron jobs, systemd timers, logrotate configs
+- SSH config, firewall rules
 - SSL certificates & expiry dates
 - .env file locations (keys only, no secrets)
+- User accounts, groups, sudo access
+- Global npm & pip packages
+- Kernel sysctl tuning
+- Network config (hosts, resolv.conf, hostname)
+- Disk mounts & fstab
+- AWS EC2 instance metadata & IAM role
+- Shell customizations (.bashrc, .profile, .zshrc)
 - Custom systemd services
 
 **Output:** `~/server-snapshot-YYYYMMDD-HHMMSS/` with a ready-to-use `reinstall.sh`
@@ -206,7 +214,20 @@ An interactive, menu-driven script with 25 options across 21 modules.
 ```
 instaserver/
 ├── setup.sh              # Entry point - sources modules, main menu, CLI flags
-├── snapshot.sh           # Server snapshot tool - captures full server state
+├── snapshot.sh           # Server snapshot tool - entry point
+├── snapshot-modules/     # Modular snapshot scanners
+│   ├── common.sh         # Colors, helpers
+│   ├── system.sh         # OS, packages, services, ports
+│   ├── projects.sh       # Git repos, frameworks, directory trees
+│   ├── webserver.sh      # Nginx, Apache, SSL certs
+│   ├── database.sh       # PostgreSQL, MySQL, MongoDB, Redis
+│   ├── docker.sh         # Containers, images, compose files
+│   ├── pm2.sh            # PM2 process list & dump
+│   ├── security.sh       # SSH, firewall, user accounts
+│   ├── env.sh            # .env files, shell config (.bashrc)
+│   ├── cron.sh           # Cron jobs, systemd timers, logrotate
+│   ├── server-config.sh  # Global packages, sysctl, network, disks, AWS metadata
+│   └── reinstall.sh      # Auto-generates reinstall script
 ├── VERSION               # Current version (semver)
 └── modules/
     ├── common.sh         # Colors, helpers, OS detection, swap, firewall
